@@ -13,6 +13,7 @@ build
 
 # include test data files
 !tests/cop_glo30/data/**/*.tif
+!tests/rema/data/**/*.tif
 !tests/data/geoid/*.tif
 
 # ignore secret files

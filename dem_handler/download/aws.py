@@ -1,10 +1,15 @@
 import os
+
+import rasterio.profiles
+import rasterio.session
 import boto3
 from botocore import UNSIGNED
 from botocore.config import Config
 from pathlib import Path
 import rasterio
 from rasterio.mask import mask
+from rasterio.io import DatasetReader
+from rasterio.session import AWSSession
 from shapely.geometry import box
 import numpy as np
 
@@ -124,27 +129,45 @@ def find_files(folder, contains):
                 paths.append(filename)
     return paths
 
-def download_rema_tiles(s3_url_list: list[str], save_folder: str) -> list[str]:
 
-    # format for request, all metres except 1km
-    # resolution = f"{resolution}m" if resolution != 1000 else "1km"
+def extract_s3_path(url: str) -> str:
+    json_url = f'https://{url.split("external/")[-1]}'
+    # Make a GET request to fetch the raw JSON content
+    response = requests.get(json_url)
+    # Check if the request was successful
+    if response.status_code != 200:
+        # Parse JSON content into a Python dictionary
+        print(
+            f"Failed to retrieve data for {os.path.splitext(os.path.basename(json_url))[0]}. Status code: {response.status_code}"
+        )
+        return ""
+
+    return json_url.replace(".json", "_dem.tif")
+
+
+def download_rema_tiles(s3_url_list: list[str], save_folder: str) -> list[str]:
+    """Downloads rema tiles from AWS S3.
+
+    Parameters
+    ----------
+    s3_url_list : list[str]
+        List od S3 URLs.
+    save_folder : str
+        Local directory to save the files to.
+
+    Returns
+    -------
+    list[str]
+        List of local paths to the saved files.
+    """
 
     # download individual dems
     dem_paths = []
     for i, s3_file_url in enumerate(s3_url_list):
         # get the raw json url
-        json_url = f'https://{s3_file_url.split("external/")[-1]}'
-        # Make a GET request to fetch the raw JSON content
-        response = requests.get(json_url)
-        # Check if the request was successful
-        if response.status_code != 200:
-            # Parse JSON content into a Python dictionary
-            print(
-                f"Failed to retrieve data for {os.path.splitext(os.path.basename(json_url))[0]}. Status code: {response.status_code}"
-            )
+        dem_url = extract_s3_path(s3_file_url)
+        if not dem_url:
             continue
-
-        dem_url = json_url.replace(".json", "_dem.tif")
         local_path = os.path.join(save_folder, dem_url.split("amazonaws.com")[1][1:])
         local_folder = os.path.dirname(local_path)
         # check if the dem.tif already exists
