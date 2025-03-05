@@ -1,0 +1,21 @@
+*.so.*
+credentials
+__pycache__
+
+build
+*.egg-info
+.*cache
+*.tif
+*.vrt
+.data
+.TMP
+
+# include test data files
+!tests/sar_pipeline/data/**/*.tif
+!tests/sar_pipeline/data/**/*.vrt
+
+# ignore secret files
+*.secret
+
+# ignore notebooks
+*.ipynb
