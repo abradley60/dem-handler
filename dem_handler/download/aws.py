@@ -124,39 +124,33 @@ def find_files(folder, contains):
                 paths.append(filename)
     return paths
 
-
-def download_REMA_tiles(s3_url_list, resolution, save_folder):
-
-    valid_res = [2, 10, 32, 100, 500, 1000]
-    assert resolution in valid_res, f"resolution must be in {valid_res}"
+def download_rema_tiles(s3_url_list: list[str], save_folder: str) -> list[str]:
 
     # format for request, all metres except 1km
-    resolution = f"{resolution}m" if resolution != 1000 else "1km"
+    # resolution = f"{resolution}m" if resolution != 1000 else "1km"
 
     # download individual dems
     dem_paths = []
     for i, s3_file_url in enumerate(s3_url_list):
-        # all urls are for 10m, set to other baws on resololution
-        s3_file_url = s3_file_url.replace("10m", f"{resolution}")
         # get the raw json url
         json_url = f'https://{s3_file_url.split("external/")[-1]}'
         # Make a GET request to fetch the raw JSON content
         response = requests.get(json_url)
         # Check if the request was successful
-        if response.status_code == 200:
+        if response.status_code != 200:
             # Parse JSON content into a Python dictionary
-            data = response.json()
-        else:
-            print(f"Failed to retrieve data. Status code: {response.status_code}")
+            print(
+                f"Failed to retrieve data for {os.path.splitext(os.path.basename(json_url))[0]}. Status code: {response.status_code}"
+            )
+            continue
 
         dem_url = json_url.replace(".json", "_dem.tif")
         local_path = os.path.join(save_folder, dem_url.split("amazonaws.com")[1][1:])
-        local_folder = "/".join(local_path.split("/")[0:-1])
+        local_folder = os.path.dirname(local_path)
         # check if the dem.tif already exists
-        dem_path = find_files(local_folder, "dem.tif")
-        if len(dem_path) > 0:
-            print(f"{dem_path[0]} already exists, skipping download")
-            dem_paths.append(dem_path[0])
+        if os.path.isfile(local_path) > 0:
+            print(f"{local_path} already exists, skipping download")
+            dem_paths.append(local_path)
             continue
         os.makedirs(local_folder, exist_ok=True)
         print(
