@@ -10,10 +10,7 @@ import shutil
 
 CURRENT_DIR = Path(__file__).parent.resolve()
 FOLDER_PATH = CURRENT_DIR / "data/copernicus_30m_world"
-GEOID_PATH = (
-    CURRENT_DIR
-    / "data/geoid/us_nga_egm2008_1_4326__agisoft_clipped.tif"
-)
+GEOID_PATH = CURRENT_DIR / "data/geoid/us_nga_egm2008_1_4326__agisoft_clipped.tif"
 TMP_PATH = CURRENT_DIR / "TMP"
 
 

@@ -16,27 +16,25 @@ from dem_handler.utils.spatial import (
     check_s1_bounds_cross_antimeridian,
     get_target_antimeridian_projection,
     split_s1_bounds_at_am_crossing,
-    adjust_bounds_at_high_lat
+    adjust_bounds_at_high_lat,
 )
 from dem_handler.utils.raster import (
-    reproject_raster, 
+    reproject_raster,
     merge_arrays_with_geometadata,
     adjust_pixel_coordinate_from_point_to_area,
     expand_bounding_box_to_pixel_edges,
 )
 from dem_handler.dem.geoid import remove_geoid
-from dem_handler.download.aws import (
-    download_cop_glo30_tiles, 
-    download_egm_08_geoid
-    )
+from dem_handler.download.aws import download_cop_glo30_tiles, download_egm_08_geoid
 
 logger = logging.getLogger(__name__)
 
 # Create a custom type that allows use of BoundingBox or tuple(xmin, ymin, xmax, ymax)
 BBox = BoundingBox | tuple[float | int, float | int, float | int, float | int]
 
-DATA_DIR = Path(__file__).parents[1] / Path('data')
-COP30_GPKG_PATH = DATA_DIR / Path('copdem_tindex_filename.gpkg')
+DATA_DIR = Path(__file__).parents[1] / Path("data")
+COP30_GPKG_PATH = DATA_DIR / Path("copdem_tindex_filename.gpkg")
+
 
 def get_cop30_dem_for_bounds(
     bounds: BBox,
@@ -46,10 +44,10 @@ def get_cop30_dem_for_bounds(
     buffer_pixels: int | None = None,
     buffer_degrees: int | float | None = None,
     cop30_index_path: Path = COP30_GPKG_PATH,
-    cop30_folder_path: Path = '.',
-    geoid_tif_path: Path = 'egm_08_geoid.tif',
+    cop30_folder_path: Path = ".",
+    geoid_tif_path: Path = "egm_08_geoid.tif",
     download_dem_tiles: bool = False,
-    download_geoid: bool =  False,
+    download_geoid: bool = False,
 ):
 
     # Convert bounding box to built-in bounding box type
@@ -166,7 +164,7 @@ def get_cop30_dem_for_bounds(
         # Find cop glo30 paths for bounds
         logger.info(f"Finding intersecting DEM files from: {cop30_index_path}")
         dem_paths = find_required_dem_paths_from_index(
-            adjusted_bounds, 
+            adjusted_bounds,
             cop30_folder_path=cop30_folder_path,
             dem_index_path=cop30_index_path,
             tifs_in_subfolder=True,
@@ -236,13 +234,14 @@ def get_cop30_dem_for_bounds(
                 f"Subtracting the geoid from the DEM to return ellipsoid heights"
             )
             if not download_geoid and not Path(geoid_tif_path).exists():
-                raise FileExistsError(f'Geoid file does not exist: {geoid_tif_path}. '\
-                                      'correct path or set download_geoid = True'
-                                      )
+                raise FileExistsError(
+                    f"Geoid file does not exist: {geoid_tif_path}. "
+                    "correct path or set download_geoid = True"
+                )
             elif download_geoid and not Path(geoid_tif_path).exists():
-                logging.info(f'Downloading the egm_08 geoid')
+                logging.info(f"Downloading the egm_08 geoid")
                 download_egm_08_geoid(geoid_tif_path, bounds=adjusted_bounds.bounds)
-            
+
             logging.info(f"Using geoid file: {geoid_tif_path}")
             dem_array = remove_geoid(
                 dem_array=dem_array,
@@ -261,7 +260,7 @@ def find_required_dem_paths_from_index(
     dem_index_path=COP30_GPKG_PATH,
     search_buffer=0.3,
     tifs_in_subfolder=True,
-    download_missing=False
+    download_missing=False,
 ) -> list[str]:
 
     if isinstance(bounds, tuple):
@@ -278,7 +277,9 @@ def find_required_dem_paths_from_index(
         )
     # Find rows that intersect with the bounding box
     intersecting_tiles = gdf[gdf.intersects(bounding_box)]
-    logger.info(f'Number of cop30 files found intersecting bounds : {len(intersecting_tiles)}')
+    logger.info(
+        f"Number of cop30 files found intersecting bounds : {len(intersecting_tiles)}"
+    )
     if len(intersecting_tiles) == 0:
         # no intersecting tiles
         return []
@@ -286,19 +287,29 @@ def find_required_dem_paths_from_index(
         dem_tiles = sorted(intersecting_tiles.location.tolist())
         local_dem_paths = []
         missing_dems = []
-        for i,t_filename in enumerate(dem_tiles):
-            t_folder = Path(cop30_folder_path) if not tifs_in_subfolder else Path(cop30_folder_path) / Path(t_filename).stem
+        for i, t_filename in enumerate(dem_tiles):
+            t_folder = (
+                Path(cop30_folder_path)
+                if not tifs_in_subfolder
+                else Path(cop30_folder_path) / Path(t_filename).stem
+            )
             t_path = t_folder / t_filename
-            local_dem_paths.append(t_path) if t_path.exists() else missing_dems.append(t_path)
-        logger.info(f'Local cop30m directory: {cop30_folder_path}')
-        logger.info(f'Number of tiles existing locally : {len(local_dem_paths)}')
-        logger.info(f'Number of tiles missing locally : {len(missing_dems)}')
-        if download_missing and len(missing_dems)>0:
+            (
+                local_dem_paths.append(t_path)
+                if t_path.exists()
+                else missing_dems.append(t_path)
+            )
+        logger.info(f"Local cop30m directory: {cop30_folder_path}")
+        logger.info(f"Number of tiles existing locally : {len(local_dem_paths)}")
+        logger.info(f"Number of tiles missing locally : {len(missing_dems)}")
+        if download_missing and len(missing_dems) > 0:
             for t_path in missing_dems:
-                download_cop_glo30_tiles(tile_filename=t_path.name, save_folder=t_path.parent)
+                download_cop_glo30_tiles(
+                    tile_filename=t_path.name, save_folder=t_path.parent
+                )
                 local_dem_paths.append(t_path)
         local_dem_paths.append(t_path)
-            
+
     return local_dem_paths
 
 
@@ -353,7 +364,7 @@ def buffer_bounds_cop_glo30(
 
 
 def get_cop_glo30_spacing(
-    bounds: BoundingBox | tuple[float | int, float | int, float | int, float | int]
+    bounds: BoundingBox | tuple[float | int, float | int, float | int, float | int],
 ) -> tuple[float, float]:
     """Get the longitude and latitude spacing for the Copernicus GLO30 DEM at the centre of the bounds
 

@@ -10,6 +10,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 # Construct a dataclass for bounding boxes
 @dataclass
 class BoundingBox:
@@ -41,8 +42,10 @@ class BoundingBox:
                 "The bounding box's x_min value is greater than or equal to x_max value. Check ordering"
             )
 
+
 # Create a custom type that allows use of BoundingBox or tuple(xmin, ymin, xmax, ymax)
 BBox = BoundingBox | tuple[float | int, float | int, float | int, float | int]
+
 
 def transform_polygon(
     geometry: Polygon, src_crs: int, dst_crs: int, always_xy: bool = True
