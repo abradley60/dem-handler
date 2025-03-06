@@ -1,12 +1,33 @@
 # dem-handler
-Utilility package for handling various Digital Elevation Models (DEMs). The package enables access to data stored in cloud as well as local copies of dem datasets. 
+Utility package for handling various Digital Elevation Models (DEMs). 
+The package enables access to data stored in cloud as well as local copies of dem datasets. 
+
+## Functionality
+
+The core functionality of this package is to provide mosaicked DEMs for arbitrary bounds.
+This is valuable for creating a mosaicked DEM that covers a scene. 
+The package provides high level functions for [supported DEMs](#supported-dems), and 
+low level functions that can be used to handle custom DEMs. 
+
+The DEM mosaicking functions have the following features:
+* When requesting a DEM for bounds that include the ocean, the mosaicked DEM will 
+include the ocean, setting the value of non-land pixels to 0 (height above the geoid).
+* If a geoid height model is provided, the height above the ellipsoid can be returned.
+* The functions work for DEM tiles stored in the cloud or locally.
+* The mosaicked DEM can be returned in memory, as well as saved to a file for reuse. 
+* When a DEM has different resolutions, the mosaicked DEM will be returned with the highest resolution.
+* If the DEM is requested over the antimeridian, the request will be split into Eastern 
+and Western hemisphere components, then merged back together in an appropriate local coordinate reference system.
+
+For more information on how the above functionality was implemented, 
+see the [design documentation](docs/design.md).
 
 ## Supported DEMS
 - Copernicus Global 30m (cop_glo30)
 - REMA (2m,10m, ...)
 
 ## Usage
-### Download tiles
+### Create mosaicked DEM for bounds from cloud files
 
 ```python
 import os
