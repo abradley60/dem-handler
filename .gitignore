@@ -1,6 +1,7 @@
 *.so.*
 credentials
 __pycache__
+.vscode
 
 build
 *.egg-info
