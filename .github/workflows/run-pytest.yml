@@ -24,4 +24,5 @@ jobs:
     - name: Run tests
       shell: micromamba-shell {0}
       run: |
+        git lfs fetch
         pytest tests/
