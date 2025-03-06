@@ -8,7 +8,7 @@ from pathlib import Path
 import os
 
 CURRENT_DIR = Path(__file__).parent.resolve()
-TEST_DATA_PATH = CURRENT_DIR / Path("data/copernicus_30m_world")
+TEST_DATA_PATH = CURRENT_DIR / "data"
 
 EXPECTED_DATA_FILES = [
     TEST_DATA_PATH
