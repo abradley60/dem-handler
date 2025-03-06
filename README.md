@@ -70,6 +70,7 @@ get_rema_dem_for_bounds(
 ```bash
 git clone ...
 conda create --file environment.yaml
+conda activate dem-handler
 pip install -e .
 ```
 
