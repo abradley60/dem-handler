@@ -11,8 +11,8 @@ build
 .TMP
 
 # include test data files
-!tests/sar_pipeline/data/**/*.tif
-!tests/sar_pipeline/data/**/*.vrt
+!tests/cop_glo30/data/**/*.tif
+!tests/cop_glo30/data/**/*.vrt
 
 # ignore secret files
 *.secret
