@@ -15,6 +15,9 @@ include the ocean, setting the value of non-land pixels to 0 (height above the g
 * If a geoid height model is provided, the height above the ellipsoid can be returned.
 * The functions work for DEM tiles stored in the cloud or locally.
 * The mosaicked DEM can be returned in memory, as well as saved to a file for reuse. 
+* When a DEM has different resolutions, the mosaicked DEM will be returned with the highest resolution.
+* If the DEM is requested over the antimeridian, the request will be split into Eastern 
+and Western hemisphere components, then merged back together in an appropriate local coordinate reference system.
 
 For more information on how the above functionality was implemented, 
 see the [design documentation](docs/design.md).
