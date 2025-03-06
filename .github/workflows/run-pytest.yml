@@ -8,6 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+      with:
+        lfs: 'true'
     - name: Set up micromamba environment
       uses: mamba-org/setup-micromamba@v2.0.3
       with:
@@ -24,5 +26,4 @@ jobs:
     - name: Run tests
       shell: micromamba-shell {0}
       run: |
-        git lfs fetch
         pytest tests/
