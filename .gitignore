@@ -1,6 +1,7 @@
 *.so.*
 credentials
 __pycache__
+.vscode
 
 build
 *.egg-info
@@ -11,8 +12,8 @@ build
 .TMP
 
 # include test data files
-!tests/sar_pipeline/data/**/*.tif
-!tests/sar_pipeline/data/**/*.vrt
+!tests/cop_glo30/data/**/*.tif
+!tests/data/geoid/*.tif
 
 # ignore secret files
 *.secret
